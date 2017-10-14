@@ -26,10 +26,13 @@ public class AlipayUtil {
 
 	static {
 		try {
+			
 			Resource resource = new ClassPathResource("alipay_private_key_pkcs8.pem");
 			APP_PRIVATE_KEY = FileUtil.readInputStream2String(resource.getInputStream());
 			resource = new ClassPathResource("alipay_public_key.pem");
 			ALIPAY_PUBLIC_KEY = FileUtil.readInputStream2String(resource.getInputStream());
+			String gateway= ConfigUtil.getProperty("alipay.gateway");
+			System.out.println(gateway);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -42,8 +45,10 @@ public class AlipayUtil {
 		if (alipayClient == null) {
 			synchronized (AlipayUtil.class) {
 				if (null == alipayClient) {
-					alipayClient = new DefaultAlipayClient("https://openapi.alipay.com/gateway.do", ALIPAY_APPID,
-							APP_PRIVATE_KEY, AlipayConstants.FORMAT_JSON, AlipayConstants.CHARSET_UTF8,
+					//alipayClient = new DefaultAlipayClient("https://openapi.alipay.com/gateway.do", ALIPAY_APPID,
+					String gateway= ConfigUtil.getProperty("alipay.gateway");
+					alipayClient = new DefaultAlipayClient(gateway, ALIPAY_APPID,
+								APP_PRIVATE_KEY, AlipayConstants.FORMAT_JSON, AlipayConstants.CHARSET_UTF8,
 							ALIPAY_PUBLIC_KEY);
 				}
 			}
