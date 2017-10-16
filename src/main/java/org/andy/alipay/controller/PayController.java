@@ -17,8 +17,10 @@ import org.andy.alipay.util.SerializerFeatureUtil;
 import org.andy.alipay.util.StringUtil;
 import org.andy.alipay.util.WebUtil;
 import org.apache.log4j.Logger;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -33,6 +35,8 @@ import com.alipay.api.request.AlipayTradeRefundRequest;
 import com.alipay.api.response.AlipayTradeFastpayRefundQueryResponse;
 import com.alipay.api.response.AlipayTradeQueryResponse;
 import com.alipay.api.response.AlipayTradeRefundResponse;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * 创建时间：2016年11月2日 下午4:16:32
@@ -40,11 +44,14 @@ import com.alipay.api.response.AlipayTradeRefundResponse;
  * @author andy
  * @version 2.2
  */
+//@CrossOrigin(origins = "http://192.168.1.179", maxAge = 3600)
+@Configuration 
 @Controller
 @RequestMapping("/order")
 public class PayController {
 
 	private static final Logger LOG = Logger.getLogger(PayController.class);
+
 
 	@RequestMapping("/greeting")
     public String greeting(@RequestParam(value="name", required=false, defaultValue="World") String name, Model model) {
@@ -63,14 +70,18 @@ public class PayController {
 	 *            商品id
 	 * @param callback
 	 */
-	//@RequestMapping(value = "/pay", method = RequestMethod.POST)
-	@RequestMapping(value = "/pay")
+	 ObjectMapper mapper = new ObjectMapper();  
+     String paramjson = "";  
+     String payMapjson = "";  
+	@CrossOrigin
+	@RequestMapping(value = "/pay", method = RequestMethod.POST)
 	public void orderPay(HttpServletRequest request, HttpServletResponse response,
-			@RequestParam(required = false, defaultValue = "0") Double cashnum, String mercid, String callback) {
+			@RequestParam(required = false, defaultValue = "0.01") Double cashnum, String mercid, String callback) throws JsonProcessingException {
 		LOG.info("[/order/pay]");
 		if (!"001".equals(mercid)) {
 			WebUtil.response(response, WebUtil.packJsonp(callback, JSON
 					.toJSONString(new JsonResult(-1, "商品不存在", new ResponseData()), SerializerFeatureUtil.FEATURES)));
+			return ;
 		}
 
 		LOG.info("AlipayUtil.ALIPAY_APPID="+AlipayUtil.ALIPAY_APPID);
@@ -83,8 +94,9 @@ public class PayController {
 		param.put("charset", AlipayConstants.CHARSET_UTF8);
 		param.put("timestamp", DatetimeUtil.formatDateTime(new Date()));
 		param.put("version", "1.0");
-		param.put("notify_url", "http://nickqiu.viphk.ngrok.org/order/pay/notify.shtml"); // 支付宝服务器主动通知商户服务
+		param.put("notify_url", "http://duyc.viphk.ngrok.org/order/pay/notify.shtml"); // 支付宝服务器主动通知商户服务
 		param.put("sign_type", AlipayConstants.SIGN_TYPE_RSA);
+
 
 		Map<String, Object> pcont = new HashMap<>();
 		// 支付业务请求参数
@@ -95,6 +107,8 @@ public class PayController {
 		pcont.put("product_code", "QUICK_MSECURITY_PAY");// 销售产品码
 		
 		param.put("biz_content", JSON.toJSONString(pcont)); // 业务请求参数  不需要对json字符串转义 
+		 
+		
 		Map<String, String> payMap = new HashMap<>();
 		try {
 			param.put("sign", PayUtil.getSign(param, AlipayUtil.APP_PRIVATE_KEY)); // 业务请求参数
@@ -103,6 +117,8 @@ public class PayController {
 			e.printStackTrace();
 		}
 
+		System.out.println(param);
+		System.out.println(payMap);
 		WebUtil.response(response, WebUtil.packJsonp(callback, JSON.toJSONString(
 				new JsonResult(1, "订单获取成功", new ResponseData(null, payMap)), SerializerFeatureUtil.FEATURES)));
 	}

@@ -41,6 +41,6 @@ dependencies {
     
     providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
    
-    compile fileTree(dir: "E:/studycode/Alipaydemo/alipayServerDemo/bin", include: 'alipay-sdk-java20171012102412.jar')
+    compile fileTree(dir: "E:/studycode/Alipaydemo/alipayServerDemo/lib", include: 'alipay-sdk-java20171012102412.jar')
     
 }
