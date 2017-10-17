@@ -7,6 +7,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.swing.plaf.synth.SynthSplitPaneUI;
 
 import org.andy.alipay.model.JsonResult;
 import org.andy.alipay.model.ResponseData;
@@ -47,6 +48,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 //@CrossOrigin(origins = "http://192.168.1.179", maxAge = 3600)
 @Configuration 
 @Controller
+@CrossOrigin
 @RequestMapping("/order")
 public class PayController {
 
@@ -94,7 +96,7 @@ public class PayController {
 		param.put("charset", AlipayConstants.CHARSET_UTF8);
 		param.put("timestamp", DatetimeUtil.formatDateTime(new Date()));
 		param.put("version", "1.0");
-		param.put("notify_url", "http://duyc.viphk.ngrok.org/order/pay/notify.shtml"); // 支付宝服务器主动通知商户服务
+		param.put("notify_url", "http://duyc.viphk.ngrok.org/order/pay/notify"); // 支付宝服务器主动通知商户服务
 		param.put("sign_type", AlipayConstants.SIGN_TYPE_RSA);
 
 
@@ -117,8 +119,6 @@ public class PayController {
 			e.printStackTrace();
 		}
 
-		System.out.println(param);
-		System.out.println(payMap);
 		WebUtil.response(response, WebUtil.packJsonp(callback, JSON.toJSONString(
 				new JsonResult(1, "订单获取成功", new ResponseData(null, payMap)), SerializerFeatureUtil.FEATURES)));
 	}
